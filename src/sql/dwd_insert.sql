@@ -1,4 +1,6 @@
 -- load data to dwd_user
+--这里我使用了之前销售案例中的那三个临时变量，把他们都放到了hive-site.xml中永久化。
+
 insert overwrite table qfbap_dwd.dwd_user 
 select 
 t.user_id,
@@ -47,11 +49,23 @@ loyal_model,
 shopping_type_model, 
 weight, 
 height, 
-current_timestamp() 
+current_timestamp() dw_date
 from qfbap_ods.ods_user_extend t;
 
+--------------------------------------------------------------------------
+/*这里我使用dt的动态分区插入，原因是：
+1.使用静态分区字段，无法传入函数值，只能传固定数值
+2.ods层中已经以dt字段分区，dw层应该直接拿来用就行，表示ods层更新的数据dw层也在当天更新。
+3.current_timestamp() 已经记录了执行语句的时间，没必要再画蛇添足
+4.使用相同的dt来分区，对where dt='${hiveconf:pre_date}'的契合率更高。
+...
+!!!注意：如果使用动态分区，务必要用where对动态分区的字段值进行限制，否则可能导致严重后果。
+
+下面所有的分区表统一改为读取ods层的dt字段来动态分区*/
+--------------------------------------------------------------------------
+
 -- load data to biz_tarde
-insert overwrite table qfbap_dwd.dwd_biz_trade  partition(dt=${hivevar:param_dt})
+insert overwrite table qfbap_dwd.dwd_biz_trade  partition(dt)
 select
 trade_id, 
 order_id, 
@@ -59,12 +73,15 @@ user_id,
 amount, 
 trade_type, 
 trade_time, 
-current_timestamp() dw_date
+current_timestamp() dw_date,
+dt
 from qfbap_ods.ods_biz_trade
-where dt=${hivevar:param_dt};
+where dt='${hiveconf:pre_date}';
+
+--提供一个清空语句：truncate table qfbap_dwd.dwd_biz_trade
 
 -- load data to cart
-insert overwrite table qfbap_dwd.dwd_cart partition(dt=${hivevar:param_dt})
+insert overwrite table qfbap_dwd.dwd_cart partition(dt)
 select
 cart_id, 
 session_id, 
@@ -75,9 +92,12 @@ add_time,
 cancle_time, 
 sumbit_time, 
 create_date,
-current_timestamp() dw_dt
+current_timestamp() dw_dt,
+dt
 from qfbap_ods.ods_cart
-where dt=${hivevar:param_dt};
+where dt='${hiveconf:pre_date}';
+
+--提供一个清空语句：truncate table qfbap_dwd.dwd_cart
 
 -- load data to code_category
 insert overwrite table qfbap_dwd.dwd_code_category
@@ -93,7 +113,7 @@ current_timestamp() dw_dt
 from qfbap_ods.ods_code_category;
 
 -- load data to order-delivery
-insert overwrite table qfbap_dwd.dwd_order_delivery partition(dt=${hivevar:param_dt})
+insert overwrite table qfbap_dwd.dwd_order_delivery partition(dt)
 select
 order_id, 
 order_no, 
@@ -109,12 +129,15 @@ carriage_money,
 create_time, 
 update_time, 
 addr_id, 
-current_timestamp() dw_dt
+current_timestamp() dw_dt,
+dt
 from qfbap_ods.ods_order_delivery
-where dt=${hivevar:param_dt};
+where dt='${hiveconf:pre_date}';
+
+--提供一个清空语句：truncate table qfbap_dwd.dwd_order_delivery
 
 -- load data to order_item
-insert overwrite table qfbap_dwd.dwd_order_item partition(dt=${hivevar:param_dt})
+insert overwrite table qfbap_dwd.dwd_order_item partition(dt)
 select
 user_id, 
 order_id, 
@@ -136,12 +159,15 @@ second_cart_name,
 third_cart, 
 third_cart_name, 
 goods_desc, 
-current_timestamp() dw_dt
+current_timestamp() dw_dt,
+dt
 from qfbap_ods.ods_order_item
-where dt=${hivevar:param_dt};
+where dt='${hiveconf:pre_date}';
+
+--提供一个清空语句：truncate table qfbap_dwd.dwd_order_item
 
 -- load data to order
-insert overwrite table qfbap_dwd.dwd_us_order partition(dt=${hivevar:param_dt})
+insert overwrite table qfbap_dwd.dwd_us_order partition(dt)
 select
 order_id, 
 order_no, 
@@ -155,15 +181,16 @@ pay_status,
 pay_type, 
 order_source, 
 update_time, 
-current_timestamp() dw_dt
+current_timestamp() dw_dt,
+dt
 from qfbap_ods.ods_us_order 
-where dt=${hivevar:param_dt};
+where dt='${hiveconf:pre_date}';
 
-
+--提供一个清空语句：truncate table qfbap_dwd.dwd_us_order
 
 
 -- load data to user_app_pv
-insert overwrite table qfbap_dwd.dwd_user_app_pv partition(dt=${hivevar:param_dt})
+insert overwrite table qfbap_dwd.dwd_user_app_pv partition(dt)
 select
 log_id, 
 user_id, 
@@ -178,12 +205,15 @@ device_token,
 visit_ip, 
 province, 
 city, 
-current_timestamp() dw_date
+current_timestamp() dw_date,
+dt
 from qfbap_ods.ods_user_app_click_log
-where dt=${hivevar:param_dt};
+where dt='${hiveconf:pre_date}';
+
+--提供一个清空语句：truncate table qfbap_dwd.dwd_user_app_pv
 
 -- load data to user_pc_pv
-insert overwrite table qfbap_dwd.dwd_user_pc_pv partition(dt=${hivevar:param_dt})
+insert overwrite table qfbap_dwd.dwd_user_pc_pv partition(dt)
 SELECT
 max(log_id),
 user_id, 
@@ -198,9 +228,10 @@ browser_name,
 visit_ip, 
 province, 
 city,
-current_timestamp() dw_date
+current_timestamp() dw_date,
+dt
 from qfbap_ods.ods_user_pc_click_log
-where dt=${hivevar:param_dt}
+where dt='${hiveconf:pre_date}'
 group by 
 user_id, 
 cookie_id,
@@ -209,8 +240,10 @@ visit_os,
 browser_name, 
 visit_ip, 
 province, 
-city;
+city,
+dt;
 
+--提供一个清空语句：truncate table qfbap_dwd.dwd_user_pc_pv
 
 -- insert overwrite table qfbap_dwd.dwd_user_addr
 --select 

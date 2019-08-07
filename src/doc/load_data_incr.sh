@@ -16,20 +16,18 @@ sqoop job -exec bap_us_order
 sqoop job -exec bap_cart
 sqoop job -exec bap_order_delivery
 sqoop job -exec bap_order_item
-sqoop job -exec bap_user_app_pv
+sqoop job -exec bap_user_app_click_log
 sqoop job -exec bap_user_pc_click_log
 echo "load full data by sqoop.ended...."
 
 #2. load data statments.
 echo "run hive load data."
-hive --database qfbap_ods -e "load data inpath '/qfbap/ods_tmp/us_order/*' into table qfbap_ods.us_order partition(dt=${dt})";
-hive --database qfbap_ods -e "load data inpath '/qfbap/ods_tmp/ods_cart/*' into table qfbap_ods.ods_cart partition(dt=${dt})";
-hive --database qfbap_ods -e "load data inpath '/qfbap/ods_tmp/ods_order_delivery/*' into table qfbap_ods.ods_order_delivery partition(dt=${dt})";
-hive --database qfbap_ods -e "load data inpath '/qfbap/ods_tmp/ods_order_item/*' into table qfbap_ods.ods_order_item partition(dt=${dt})";
-hive --database qfbap_ods -e "load data inpath '/qfbap/ods_tmp/ods_user_app_pv/*' into table qfbap_ods.ods_user_app_pv partition(dt=${dt})";
-hive --database qfbap_ods -e "load data inpath '/qfbap/ods_tmp/ods_user_pc_click_log/*' into table qfbap_ods.ods_user_pc_click_log partition(dt=${dt})";
+beeline -u jdbc:hive2://master:10000/qfbap_ods -e "load data inpath '/qfbap/ods_tmp/ods_us_order/*' into table qfbap_ods.ods_us_order partition(dt='${dt}');"
+beeline -u jdbc:hive2://master:10000/qfbap_ods -e "load data inpath '/qfbap/ods_tmp/ods_cart/*' into table qfbap_ods.ods_cart partition(dt='${dt}');"
+beeline -u jdbc:hive2://master:10000/qfbap_ods -e "load data inpath '/qfbap/ods_tmp/ods_order_delivery/*' into table qfbap_ods.ods_order_delivery partition(dt='${dt}');"
+beeline -u jdbc:hive2://master:10000/qfbap_ods -e "load data inpath '/qfbap/ods_tmp/ods_order_item/*' into table qfbap_ods.ods_order_item partition(dt='${dt}');"
+beeline -u jdbc:hive2://master:10000/qfbap_ods -e "load data inpath '/qfbap/ods_tmp/ods_user_app_click_log/*' into table qfbap_ods.ods_user_app_click_log partition(dt='${dt}');"
+beeline -u jdbc:hive2://master:10000/qfbap_ods -e "load data inpath '/qfbap/ods_tmp/ods_user_pc_click_log/*' into table qfbap_ods.ods_user_pc_click_log partition(dt='${dt}');"
 echo "run hive load data end."
-
-
 
 
