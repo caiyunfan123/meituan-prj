@@ -1,0 +1,21 @@
+1.azkaban3.4版本突然无法启动，azkaban2.5版本则可以正常启动
+-web端的错误信息为：Exception: com.google.inject.internal.util.$ComputationException thrown from the UncaughtExceptionHandler in                            thread "main"
+-exec端的错误信息为：java.lang.NoSuchFieldError: INSTANCE
+首先，昨天3版本可以启动，今天不行，而今天我把原本的cdh环境切换成了原生环境，因此必然是环境问题。
+一个一个尝试着切换，发现当切换到hbase时，azkaban3恢复正常启动，问题定位到hbase上。
+百度查询exec端的错误信息，可知是lib包冲突问题，因此将hbase在环境中的lib移除，azkban3恢复正常启动。
+-总结：hbase的lib不能写在环境变量的classpath中。
+
+2.hadoop环境启动时会报
+“Unable to load native-hadoop library for your platform.”错误，
+这个错误虽然不会影响运行，但是每次执行hadoop命令都会弹出来挺烦的，因此百度后，在环境变量中添加：
+export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native
+export HADOOP_OPTS="-Djava.library.path=$HADOOP_COMMON_LIB_NATIVE_DIR"
+执行 hadoop checknative -a
+发现结果从原先的false变为了true。
+重启hadoop，错误不再出现。
+
+3.美团源代码执行策略：
+1.在mysql中执行/src/sql/qfbap_date_init.sql，创建数据库源数据
+2.在hive中执行/src/sql/hive_dwd_create_table.sql和hive_ods_create_table.sql，创建hive表
+3.执行/src/doc/load_data的sh脚本导入数据（手动更改参数）
