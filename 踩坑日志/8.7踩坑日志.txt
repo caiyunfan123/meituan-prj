@@ -4,3 +4,23 @@
 2.sqoop 参数中的-- import 参数跟其他参数不一样，需要前后都空一格
 
 3.我的hive2.3版本不知道为什么打印到控制台的信息量有点少，但是输出的信息量还算能接受，为了以后使用spark引擎着想，这个项目开始我将使用原生hadoop2.7+hive2.3的版本
+
+4.load_data_incr.sh中，bap_user_app_pv表不存在，应改为bap_user_app_click_log
+至于下半段load data 部分，问题实在太多了，列举不能，大伙直接用我修改过的脚本吧。
+
+5.dwd_insert.sql中的bug较少，我稍微改动了一下分区变量，把变量设置在hive-site.xml中永久化。
+--PS:
+    该dwd_insert中的结构，第一次导入时只能将所有数据导入到一个文件夹中，很可能导致数据倾斜，应该设置为动态分区；
+    另外，insert overwrite到一个分区表中的操作也确实古怪。
+
+6.严重警告：insert into table partition()中的赋予分区字段值，只能读取静态数据，不能使用函数操作。
+在partition(key=value)中，如果使用${}，只能获取到给定的语句，不能实际操作，如：
+set hivevar:abc=current_timestamp()，partition(dt=${hivevar:abc})只能得到
+partition(dt=current_timestamp())，拿不到具体的值。
+
+因此使用静态分区插入数据，要么从外部传入具体的数值，要么使用动态分区在select语句中获取具体的值。
+顺便一提：如果传'${hivevar:abc}'给dt，得到的也只是'current_timestamp()'这个字符串而已，语句虽然能执行但是没有实际意义。
+
+-我已经尝试了无数种写法，确定静态分区字段确实不会执行语句，只会原原本本地显示变量的原值。
+
+7.值得一提的是老师提供的dwd语句中没有初次装载的部分，因此初次装载时应该把where字段先删除，将所有ods层的数据全量导入，后面增量导入时再用where进行过滤
