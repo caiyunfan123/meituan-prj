@@ -245,12 +245,12 @@ dt;
 
 --提供一个清空语句：truncate table qfbap_dwd.dwd_user_pc_pv
 
--- insert overwrite table qfbap_dwd.dwd_user_addr
---select 
---user_id, 
---order_addr, 
---user_order_flag, 
---addr_id, 
---arear_id, 
---current_timestamp() dw_date
---from qfbap_ods.ods_user_addr;
+insert overwrite table qfbap_dwd.dwd_user_addr
+select 
+user_id, 
+order_addr, 
+user_order_flag, 
+addr_id, 
+arear_id, 
+current_timestamp() dw_date
+from qfbap_ods.ods_user_addr;

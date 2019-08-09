@@ -1,0 +1,3 @@
+1.datesub统一改成datediff(current_date,log_time)<x+1，表示取0-x天的数据
+
+2.dm层解析完成
