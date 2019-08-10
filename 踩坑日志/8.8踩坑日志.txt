@@ -1,0 +1,14 @@
+1.出现too many open file时，控制台输入ulimit -n 65536
+vim /etc/security/limits.conf 末尾添加
+* soft nofile 65536
+* hard nofile 65536
+记得重启
+
+2.修改qfbap_dws.dws_user_visit_month1表
+-原 where dt >= date_sub(current_date,30)
+  改为 where datediff(current_date,in_time)<=31
+  原因：dt为源表sql语句的分区字段，是执行时间，不是真实ip访问时间。
+
+-添加新字段in_time，更直观地显示该ip的当日最后一次登陆时间
+
+3.最好开启JVM重用

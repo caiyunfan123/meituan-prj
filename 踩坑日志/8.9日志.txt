@@ -1,0 +1,29 @@
+1.datesub统一改成datediff(current_date,log_time)<x+1，表示取0-x天的数据
+
+2.dm层解析完成
+
+3.dm_insert修改完成，测试通过。
+
+4.使用ctas生成表，再用db工具拷出表结构，手动创建分区表再导入数据，--追加：这里应该将ctas生成的表结构修改一下，bigInt改成int
+
+5.用-f传进去的参数不是string类型，需要的时候可以用cast(x of string)强制转换成string.
+
+6.azkaban上传的文件不支持中文名。
+
+7.关于yaml语法：https://www.cnblogs.com/shmily2018/p/9317543.html
+
+8.使用sqoop，一定要用密码文件，不要用密码，sqoop job执行时强制要求密码，除非提供密码文件
+注意：密码文件一定要放在hdfs上，权限大于400
+
+9.shell命令行不能使用关键字作为文件名前缀，因此原本export_filename.sql被迫改为out_filename.sql
+
+10.时间问题真是坑死人了，最后使用的办法:
+从外界传入的参数为时间戳，dt0=`date -d "1 days ago" "+%s"`
+然后在内部sql用
+set hivevar:dt=from_unixtime(${hivevar:dt0},'yyyy-MM-dd');
+将传进来的参数转成想要的date格式.
+
+11.卡在最后一个导出到mysql了，报错：during export error。
+猜测原因：	1.分隔符指定不当，要解决的话只能重新建表了 
+			2.文件路径没有指全，这个可能性不大，应该只要到目录就好了才对
+结果原因都不对，是空值问题。。。
