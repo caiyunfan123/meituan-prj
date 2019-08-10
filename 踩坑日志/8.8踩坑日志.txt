@@ -2,6 +2,7 @@
 vim /etc/security/limits.conf 末尾添加
 * soft nofile 65536
 * hard nofile 65536
+记得重启
 
 2.修改qfbap_dws.dws_user_visit_month1表
 -原 where dt >= date_sub(current_date,30)
@@ -10,4 +11,4 @@ vim /etc/security/limits.conf 末尾添加
 
 -添加新字段in_time，更直观地显示该ip的当日最后一次登陆时间
 
-3.更新dm层解析，目前进度：3
+3.最好开启JVM重用

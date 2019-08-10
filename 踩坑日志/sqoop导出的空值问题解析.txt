@@ -1,0 +1,23 @@
+解析空值问题：
+1.如果你在sqoop语句中设置了以下两个参数
+--null-string 'null' \
+--null-non-string '0' \
+那么，sqoop在执行导出前会先读入mysql中所有字段的类型，然后在MR的map阶段的最后执行write()方法前，先判断读入的值是否为空，
+如果是空值，字符串赋予默认值'null',非字符串赋予默认值'0'，默认值由你的参数决定。
+因此记住，null-string和null-non-string不是指定空值的参数！！！
+
+2.那么sqoop是怎么判断空值的呢？
+MR本质是java程序，假设当前字段是user_ip，在进行到判断空值时，会执行下方判断：
+user_ip==null?'null':user_ip;
+从这里可以看出，sqoop对空值的识别一定是''，也就是说，你的数据保存空值的方式必须设置成''才能被识别，而hive默认的空值保存方式是'\N'，所以这里一定报错。
+
+3.如何设置保存空值的字符？
+建表时使用
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
+   WITH SERDEPROPERTIES (
+        'field.delim'='\t',
+        'serialization.null.format'='')
+指定完整的读取格式，其中escape.delim指定转义字符，serialization.null.format指定空值保存字符。
+如果是已经建好的表，可以用
+alter table {TABLE_NAME} set serdeproperties('serialization.null.format' = '');
+指定空值保存字符。

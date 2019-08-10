@@ -1,6 +1,7 @@
 -- load data to dwd_user
 --这里我使用了之前销售案例中的那三个临时变量，把他们都放到了hive-site.xml中永久化。
 
+set hivevar:dt=from_unixtime(${hivevar:dt0},'yyyy-MM-dd');
 insert overwrite table qfbap_dwd.dwd_user 
 select 
 t.user_id,
@@ -57,7 +58,7 @@ from qfbap_ods.ods_user_extend t;
 1.使用静态分区字段，无法传入函数值，只能传固定数值
 2.ods层中已经以dt字段分区，dw层应该直接拿来用就行，表示ods层更新的数据dw层也在当天更新。
 3.current_timestamp() 已经记录了执行语句的时间，没必要再画蛇添足
-4.使用相同的dt来分区，对where dt='${hiveconf:pre_date}'的契合率更高。
+4.使用相同的dt来分区，对where dt=${dt}的契合率更高。
 ...
 !!!注意：如果使用动态分区，务必要用where对动态分区的字段值进行限制，否则可能导致严重后果。
 
@@ -76,7 +77,7 @@ trade_time,
 current_timestamp() dw_date,
 dt
 from qfbap_ods.ods_biz_trade
-where dt='${hiveconf:pre_date}';
+where dt=${dt};
 
 --提供一个清空语句：truncate table qfbap_dwd.dwd_biz_trade
 
@@ -95,7 +96,7 @@ create_date,
 current_timestamp() dw_dt,
 dt
 from qfbap_ods.ods_cart
-where dt='${hiveconf:pre_date}';
+where dt=${dt};
 
 --提供一个清空语句：truncate table qfbap_dwd.dwd_cart
 
@@ -132,7 +133,7 @@ addr_id,
 current_timestamp() dw_dt,
 dt
 from qfbap_ods.ods_order_delivery
-where dt='${hiveconf:pre_date}';
+where dt=${dt};
 
 --提供一个清空语句：truncate table qfbap_dwd.dwd_order_delivery
 
@@ -162,7 +163,7 @@ goods_desc,
 current_timestamp() dw_dt,
 dt
 from qfbap_ods.ods_order_item
-where dt='${hiveconf:pre_date}';
+where dt=${dt};
 
 --提供一个清空语句：truncate table qfbap_dwd.dwd_order_item
 
@@ -184,7 +185,7 @@ update_time,
 current_timestamp() dw_dt,
 dt
 from qfbap_ods.ods_us_order 
-where dt='${hiveconf:pre_date}';
+where dt=${dt};
 
 --提供一个清空语句：truncate table qfbap_dwd.dwd_us_order
 
@@ -208,7 +209,7 @@ city,
 current_timestamp() dw_date,
 dt
 from qfbap_ods.ods_user_app_click_log
-where dt='${hiveconf:pre_date}';
+where dt=${dt};
 
 --提供一个清空语句：truncate table qfbap_dwd.dwd_user_app_pv
 
@@ -231,7 +232,7 @@ city,
 current_timestamp() dw_date,
 dt
 from qfbap_ods.ods_user_pc_click_log
-where dt='${hiveconf:pre_date}'
+where dt=${dt}
 group by 
 user_id, 
 cookie_id,

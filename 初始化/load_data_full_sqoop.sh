@@ -11,7 +11,7 @@ sqoop job --create bap_code_category -- import \
  --connect jdbc:mysql://master:3306/qfbap_ods?dontTrackOpenResources=true\&defaultFetchSize=1000\&useCursorFetch=true \
  --driver com.mysql.jdbc.Driver \
  --username root \
- --password admin \
+ --password-file hdfs:///password.file \
  --table code_category \
  --delete-target-dir \
  --target-dir /qfbap/ods/ods_code_category \
@@ -21,7 +21,7 @@ sqoop job --create bap_user -- import \
  --connect jdbc:mysql://master:3306/qfbap_ods?dontTrackOpenResources=true\&defaultFetchSize=1000\&useCursorFetch=true \
  --driver com.mysql.jdbc.Driver \
  --username root \
- --password admin \
+ --password-file hdfs:///password.file \
  --table user \
  --delete-target-dir \
  --target-dir /qfbap/ods/ods_user/ \
@@ -31,7 +31,7 @@ sqoop job --create bap_user_extend -- import \
  --connect jdbc:mysql://master:3306/qfbap_ods?dontTrackOpenResources=true\&defaultFetchSize=1000\&useCursorFetch=true \
  --driver com.mysql.jdbc.Driver \
  --username root \
- --password admin \
+ --password-file hdfs:///password.file \
  --table user_extend \
  --delete-target-dir \
  --target-dir /qfbap/ods/ods_user_extend/ \
@@ -41,7 +41,7 @@ sqoop job --create bap_user_addr -- import \
  --connect jdbc:mysql://master:3306/qfbap_ods?dontTrackOpenResources=true\&defaultFetchSize=1000\&useCursorFetch=true \
  --driver com.mysql.jdbc.Driver \
  --username root \
- --password admin \
+ --password-file hdfs:///password.file \
  --table user_addr \
  --delete-target-dir \
  --target-dir /qfbap/ods/ods_user_addr/ \

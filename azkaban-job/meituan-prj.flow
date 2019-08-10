@@ -1,0 +1,58 @@
+---
+config:
+#这里填写全局变量，在各个job中用${}来使用
+#dt填写要统计的日期，不是执行日期，下方脚本注释掉的话，默认为昨天
+  dt: 2018-09-20
+
+nodes:
+
+#全量导入ods.job
+
+ - name: load_data_full
+   type: command
+   config:
+     command: bash load_data_full.sh #${dt}
+
+#增量导入ods.job
+
+ - name: load_data_incr
+   type: command
+   config:
+     command: bash load_data_incr.sh #${dt}
+
+#dwd层数据装载.job
+
+ - name: load_data_dwd
+   type: command
+   dependsOn:
+     - load_data_full
+     - load_data_incr
+   config:
+     command: bash load_data_dwd.sh #${dt}
+
+#dws层数据装载.job
+
+ - name: load_data_dws
+   type: command
+   dependsOn:
+     - load_data_dwd
+   config:
+     command: bash load_data_dws.sh #${dt}
+
+#dm层数据装载.job
+
+ - name: load_data_dm
+   type: command
+   dependsOn:
+     - load_data_dws
+   config:
+     command: bash load_data_dm.sh #${dt}
+
+#导出dm层数据到mysql.job
+
+ - name: export_data_sqoop
+   type: command
+   dependsOn:
+     - load_data_dm
+   config:
+     command: bash out_data_sqoop.sh #${dt}

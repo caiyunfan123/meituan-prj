@@ -1,5 +1,4 @@
---qfbap_dm.dm_user_visit
---假设统计的是昨天的数据，dt=date_sub(current_date,1),in_time>=date_sub(current_date,7)
+--计算用户行为
 select 
    us.user_id
    ,r_pc.latest_pc_visit_date-- 最近一次访问时间
@@ -94,7 +93,7 @@ select
       else r_app.first_province
     end
     ) first_province -- 第一次访问的省份
-from qfbap_dws.dws_user_basic  us
+from qfbap_dwd.dws_user_basic  us
 left join (
 
     -- PC端的统计指标
@@ -120,10 +119,11 @@ left join (
        ,max(case when pc.rn_asc = 1 then visit_os end) first_pc_visit_os-- 最早一次访问的os
        ,sum(dt7) day7_pc_cnt --连续7天访问次数
        ,sum(dt15) day15_pc_cnt-- 连续15天访问次数
-       ,sum(dt30) month1_pc_cnt -- 连续30天访问次数
+       ,sum(dt30) month1_pc_cnt -- 近30天访问session总数
        ,sum(dt60) month2_pc_cnt-- 连续60天访问的次数
        ,sum(dt90) month3_pc_cnt -- 连续90天访问的次数
        ,count(distinct (case when dt30=1 then substr(in_time,0,8) end)) month1_pc_days --近30天pc端访问的次数
+	   --这个distinct毫无意义，in_time在dwd源表中本就已经是min(in_time)，是指一天登陆的最早时间，因此这个语句的意义就是近30天访问的天数，与dt30相同
        ,sum(case when dt30=1 then pv end ) month1_pc_pv --近30天pc端的pv
        ,sum(case when dt30=1 then pv end ) 
           /count(distinct(case when dt30=1 then substr(in_time,0,8) end)) month1_pc_avg_pv --近30天pc端每天的平均pv
@@ -149,12 +149,12 @@ left join (
           visit_ip,
           province,
           city,
-		  --因为以当前日期为准，所以应该取到7天前的数据
-          (case when datediff(current_date,in_time)<8 then 1 end ) dt7,
-          (case when datediff(current_date,in_time)<16 then 1 end ) dt15,
-          (case when datediff(current_date,in_time)<31 then 1 end) dt30,
-          (case when datediff(current_date,in_time)<61 then 1 end) dt60,
-          (case when datediff(current_date,in_time)<91 then 1 end) dt90,
+          (case when in_time >=date_add('2018-12-25',-6) then 1 end ) dt7,
+          (case when in_time>=date_sub('2018-12-25',14) then 1 end ) dt15,
+          (case when in_time >= date_sub('2018-12-25',29) then 1 end) dt30,
+		  --dt30:in_time一天只有一条，该语句求的是近30天内登陆的总天数，不是连续30天登陆次数
+          (case when in_time >= date_sub('2018-12-25',59) then 1 end) dt60,
+           (case when in_time >= date_sub('2018-12-25',179) then 1 end) dt90,
           (case when hour(in_time) between 0 and 5 then 1 end) hr025,
           (case when hour(in_time) between 6 and 7 then 1 end ) hr627,
           (case when hour(in_time) between 8 and 9 then 1 end ) hr829,
@@ -170,8 +170,7 @@ left join (
           stay_time,
           pv
        from qfbap_dwd.dwd_user_pc_pv t
-	   --改成昨天
-       where dt =date_sub(current_date,1)
+       where dt ='2018-12-25'
     )  pc
     group by user_id
 
@@ -215,7 +214,6 @@ left join (
            end) month1_pc_common_os -- 近30天使用最常用系统
     
         from qfbap_dws.dws_user_visit_month1
-		where datediff(current_date,in_time)<31
         group by user_id
     ) pc_month1 on us.user_id = pc_month1.user_id
 left join (
@@ -254,6 +252,7 @@ left join (
         user_id ,
         log_time ,
         log_hour ,
+        phone_id ,
         visit_os ,
         os_version ,
         app_name   ,
@@ -264,11 +263,11 @@ left join (
         city,
         row_number() over(distribute by user_id sort by  log_time asc) rn_asc,
         row_number() over(distribute by user_id sort by  log_time desc) rn_desc,
-        (case when datediff(current_date,log_time)<8 then 1 end) app_dt7,
-        (case when datediff(current_date,log_time)<16 then 1 end) app_dt15,
-        (case when datediff(current_date,log_time)<31 then 1 end) app_dt30,
-        (case when datediff(current_date,log_time)<61 then 1 end) app_dt60,
-        (case when datediff(current_date,log_time)<91 then 1 end) app_dt90,
+        (case when log_time>=date_sub('2018-12-25',6) then 1 end) app_dt7,
+        (case when log_time>=date_sub('2018-12-25',14) then 1 end) app_dt15,
+        (case when log_time>=date_sub('2018-12-25',29) then 1 end) app_dt30,
+        (case when log_time>=date_sub('2018-12-25',59) then 1 end) app_dt60,
+        (case when log_time>=date_sub('2018-12-25',89) then 1 end) app_dt90,
         (case when hour(log_time) between 0 and 5 then 1 end) app_hr_025,
         (case when hour(log_time) between 6 and 7 then 1 end) app_hr_627,
         (case when hour(log_time) between 8 and 9 then 1 end) app_hr_829,

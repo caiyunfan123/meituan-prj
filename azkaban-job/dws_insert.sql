@@ -1,4 +1,6 @@
 --dws_user_visit_month1
+--默认传入的参数是昨天，统计发生在今天，要统计的是到昨天为止的数据
+set hivevar:dt=from_unixtime(${hivevar:dt0},'yyyy-MM-dd');
 create table if not exists qfbap_dws.dws_user_visit_month1(
 user_id int,
 type string,
@@ -11,8 +13,7 @@ partitioned by (dt date)
 row format delimited fields terminated by '\t'
 stored as textfile;
 
---假设统计的是昨天的数据，dt=date_sub(current_date,1),where dt >= date_sub(current_date,30)
-insert into qfbap_dws.dws_user_visit_month1 partition(dt)
+insert overwrite table qfbap_dws.dws_user_visit_month1 partition(dt)
 select
 t.user_id,
 t.type,
@@ -20,7 +21,7 @@ t.cnt,
 t.content,
 t.in_time,
 row_number() over(distribute by user_id,type sort by cnt desc) rn,
-date_sub(current_date,1) dt
+${dt} dt
 from (
 select
   user_id,
@@ -30,7 +31,7 @@ select
   max(in_time) as in_time
 from qfbap_dwd.dwd_user_pc_pv
 --写<=31的原因：数据最多只会到昨天导入的数据为止，因此过滤0-30天内的数据没问题
-where datediff(current_date,in_time)<31
+where datediff(${dt},in_time)<30
 group by 
     user_id,
     visit_ip
@@ -42,7 +43,7 @@ select
   cookie_id as content,
   max(in_time) as in_time
 from qfbap_dwd.dwd_user_pc_pv
-where datediff(current_date,in_time)<31
+where datediff(${dt},in_time)<30
 group by 
     user_id,
     cookie_id
@@ -54,7 +55,7 @@ select
   browser_name as content,
   max(in_time) as in_time
 from qfbap_dwd.dwd_user_pc_pv
-where datediff(current_date,in_time)<31
+where datediff(${dt},in_time)<30
 group by 
     user_id,
     browser_name
@@ -66,11 +67,11 @@ select
   visit_os as content,
   max(in_time) as in_time
 from qfbap_dwd.dwd_user_pc_pv
-where datediff(current_date,in_time)<31
+where datediff(${dt},in_time)<30
 group by 
     user_id,
     visit_os
-) t
+) t;
 
 
 --dws_user_basic
@@ -116,4 +117,4 @@ select
    b.weight            weight               ,
    b.height            height               
 from qfbap_ods.ods_user a
-left join qfbap_ods.ods_user_extend b on a.user_id = b.user_id
+left join qfbap_ods.ods_user_extend b on a.user_id = b.user_id;

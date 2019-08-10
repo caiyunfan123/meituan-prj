@@ -13,7 +13,7 @@ sqoop job --create bap_us_order -- import \
 --connect jdbc:mysql://master:3306/qfbap_ods?dontTrackOpenResources=true\&defaultFetchSize=1000\&useCursorFetch=true \
 --driver com.mysql.jdbc.Driver \
 --username root \
---password admin \
+--password-file hdfs:///password.file \
 --table us_order \
 --target-dir /qfbap/ods_tmp/ods_us_order/ \
 --fields-terminated-by '\001' \
@@ -28,7 +28,7 @@ sqoop job --create bap_cart -- import \
 --connect jdbc:mysql://master:3306/qfbap_ods?dontTrackOpenResources=true\&defaultFetchSize=1000\&useCursorFetch=true \
 --driver com.mysql.jdbc.Driver \
 --username root \
---password admin \
+--password-file hdfs:///password.file \
 --table cart \
 --target-dir /qfbap/ods_tmp/ods_cart/ \
 --fields-terminated-by '\001' \
@@ -43,7 +43,7 @@ sqoop job --create bap_order_delivery -- import \
 --connect jdbc:mysql://master:3306/qfbap_ods?dontTrackOpenResources=true\&defaultFetchSize=1000\&useCursorFetch=true \
 --driver com.mysql.jdbc.Driver \
 --username root \
---password admin \
+--password-file hdfs:///password.file \
 --table order_delivery \
 --target-dir /qfbap/ods_tmp/ods_order_delivery/ \
 --fields-terminated-by '\001' \
@@ -58,7 +58,7 @@ sqoop job --create bap_order_item -- import \
 --connect jdbc:mysql://master:3306/qfbap_ods?dontTrackOpenResources=true\&defaultFetchSize=1000\&useCursorFetch=true \
 --driver com.mysql.jdbc.Driver \
 --username root \
---password admin \
+--password-file hdfs:///password.file \
 --table order_item \
 --target-dir /qfbap/ods_tmp/ods_order_item/ \
 --fields-terminated-by '\001' \
@@ -74,7 +74,7 @@ sqoop job --delete bap_user_app_click_log
  --connect jdbc:mysql://master:3306/qfbap_ods?dontTrackOpenResources=true\&defaultFetchSize=1000\&useCursorFetch=true \
  --driver com.mysql.jdbc.Driver \
  --username root \
- --password admin \
+ --password-file hdfs:///password.file \
  --table user_app_click_log \
  --target-dir /qfbap/ods_tmp/ods_user_app_click_log/ \
  --fields-terminated-by '\001' \
@@ -89,7 +89,7 @@ sqoop job --delete bap_user_pc_click_log
  --connect jdbc:mysql://master:3306/qfbap_ods?dontTrackOpenResources=true\&defaultFetchSize=1000\&useCursorFetch=true \
  --driver com.mysql.jdbc.Driver \
  --username root \
- --password admin \
+ --password-file hdfs:///password.file \
  --table user_pc_click_log \
  --target-dir /qfbap/ods_tmp/ods_user_pc_click_log/ \
  --fields-terminated-by '\001' \
