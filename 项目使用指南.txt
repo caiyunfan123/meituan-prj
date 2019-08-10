@@ -1,0 +1,6 @@
+1.上传初始化文件夹中的password.file到hdfs根目录
+2.修改namenode-mysql-hiveserver2所在机的域名为master（或者把我项目中所有出现master的地方都改成你自己的域名）
+3.执行初始化文件夹中所有文件
+4.上传azkaban-job.zip到azkaban项目中
+5.设置每日执行
+6.如果有需要，可以修改flow文件，使用dt变量来指定要统计的日期。
