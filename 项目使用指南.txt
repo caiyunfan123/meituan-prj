@@ -1,9 +1,10 @@
 1.上传初始化文件夹中的password.file到hdfs根目录
 2.修改namenode-mysql-hiveserver2所在机的域名为master（或者把我项目中所有出现master的地方都改成你自己的域名）
-3.执行初始化文件夹中所有文件
-4.如果是azkaban3以上的用户，可以直接跳过本步骤：
+3.执行初始化文件夹中所有文件（mysql的初始化到mysql中执行，hive的初始化到hive中执行）
+4.把azkaban-job文件夹放到linux磁盘根目录（或修改load_data_dm.sh、dwd.sh、dws.sh三个文件中的目录为sql文件的存放目录）
+5.如果是azkaban3以上的用户，可以直接跳过本步骤：
 	i.进入azkaban-job文件夹，将meituan-prj.flow文件中的所有job分别创建各自的job文件，文件名要跟name的名字一致
 	ii.删除.flow文件和.project文件，再将全部文件打包成azkaban-job.zip
-5.上传azkaban-job.zip到azkaban项目中
-6.设置每日执行
-7.如果有需要，可以修改flow文件，使用dt变量来指定要统计的日期。
+6.上传azkaban-job.zip到azkaban项目中
+7.执行，设置每日执行
+8.如果有需要，可以修改flow文件，使用dt变量来指定要统计的日期。
