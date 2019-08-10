@@ -21,3 +21,7 @@ ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
 如果是已经建好的表，可以用
 alter table {TABLE_NAME} set serdeproperties('serialization.null.format' = '');
 指定空值保存字符。
+
+4.也可以使用来指定空值字符串，如果用了这个方法，就不需要在建表时指定空值保存字符了
+--input-null-string '\\N' \
+--input-null-non-string '\\N' \
